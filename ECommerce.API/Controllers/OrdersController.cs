@@ -18,6 +18,7 @@ public class OrdersController : ControllerBase
     public OrdersController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
+    [Authorize(Roles = "Customer,Admin")]
     public async Task<IActionResult> GetMyOrders()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -25,6 +26,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -34,6 +36,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateOrderStatusCommand cmd)
     {
         await _mediator.Send(cmd with { OrderId = id });

@@ -26,7 +26,7 @@ public class ProductsController : ControllerBase
         Ok(await _mediator.Send(new GetProductByIdQuery(id)));
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateProductCommand cmd)
     {
         var id = await _mediator.Send(cmd);
@@ -34,15 +34,21 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductRequest request)
     {
-        await _mediator.Send(new UpdateProductCommand(id, request.Name, request.Description, request.Price));
+        await _mediator.Send(new UpdateProductCommand(
+            id,
+            request.Name,
+            request.Description,
+            request.Price,
+            request.ImageUrl
+        ));
         return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _mediator.Send(new DeleteProductCommand(id));
@@ -50,4 +56,9 @@ public class ProductsController : ControllerBase
     }
 }
 
-public record UpdateProductRequest(string Name, string Description, decimal Price);
+public record UpdateProductRequest(
+    string Name,
+    string Description,
+    decimal Price,
+    string? ImageUrl = null
+);

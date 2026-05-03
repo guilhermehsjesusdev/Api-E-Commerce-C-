@@ -9,13 +9,14 @@ public class Product
     public string Description { get; private set; } = string.Empty;
     public decimal Price { get; private set; }
     public int Stock { get; private set; }
+    public string? ImageUrl { get; private set; }
     public Guid CategoryId { get; private set; }
     public Category? Category { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     protected Product() { }
 
-    public Product(string name, string description, decimal price, int stock, Guid categoryId)
+    public Product(string name, string description, decimal price, int stock, Guid categoryId, string? imageUrl = null)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -23,14 +24,16 @@ public class Product
         Price = price;
         Stock = stock;
         CategoryId = categoryId;
+        ImageUrl = imageUrl;
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string name, string description, decimal price)
+    public void Update(string name, string description, decimal price, string? imageUrl = null)
     {
         Name = name;
         Description = description;
         Price = price;
+        ImageUrl = imageUrl;
     }
 
     public void UpdateStock(int quantity) => Stock = quantity;

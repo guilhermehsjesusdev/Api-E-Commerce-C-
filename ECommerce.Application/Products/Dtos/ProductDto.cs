@@ -6,5 +6,6 @@ public record ProductDto(
     string Description,
     decimal Price,
     int Stock,
-    Guid CategoryId
+    Guid CategoryId,
+    string? ImageUrl
 );

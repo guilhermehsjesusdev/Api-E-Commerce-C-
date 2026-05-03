@@ -15,7 +15,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand>
         var product = await _repo.GetByIdAsync(cmd.Id)
             ?? throw new NotFoundException("Product", cmd.Id);
 
-        product.Update(cmd.Name, cmd.Description, cmd.Price);
+        product.Update(cmd.Name, cmd.Description, cmd.Price, cmd.ImageUrl);
         await _repo.UpdateAsync(product);
     }
 }

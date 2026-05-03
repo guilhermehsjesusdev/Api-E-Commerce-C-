@@ -17,7 +17,13 @@ public class GetProductByIdHandler : IRequestHandler<GetProductByIdQuery, Produc
             ?? throw new NotFoundException("Product", q.Id);
 
         return new ProductDto(
-            product.Id, product.Name, product.Description,
-            product.Price, product.Stock, product.CategoryId);
+            product.Id,
+            product.Name,
+            product.Description,
+            product.Price,
+            product.Stock,
+            product.CategoryId,
+            product.ImageUrl
+        );
     }
 }

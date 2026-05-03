@@ -12,7 +12,14 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Guid>
 
     public async Task<Guid> Handle(CreateProductCommand cmd, CancellationToken ct)
     {
-        var product = new Product(cmd.Name, cmd.Description, cmd.Price, cmd.Stock, cmd.CategoryId);
+        var product = new Product(
+            cmd.Name,
+            cmd.Description,
+            cmd.Price,
+            cmd.Stock,
+            cmd.CategoryId,
+            cmd.ImageUrl
+        );
         await _repo.AddAsync(product);
         return product.Id;
     }

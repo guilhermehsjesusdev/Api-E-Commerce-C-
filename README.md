@@ -1,48 +1,49 @@
-# ECommerce API
+# ECommerce Front
 
-API RESTful desenvolvida em **C# .NET 10** com **Clean Architecture**, autenticação JWT, CQRS com MediatR e banco de dados PostgreSQL.
+Frontend do projeto E-Commerce desenvolvido com **Angular 18** e **Tailwind CSS**, consumindo a [ECommerce API](https://github.com/seu-usuario/ecommerce-api).
 
 ---
 
 ## Tecnologias
 
-- .NET 10
-- ASP.NET Core Web API
-- Entity Framework Core + Npgsql (PostgreSQL)
-- ASP.NET Identity
-- JWT Bearer Authentication
-- MediatR (CQRS)
-- FluentValidation
-- AutoMapper
-- Swagger / OpenAPI
-- Docker + Docker Compose
+- Angular 18 (Standalone Components)
+- Tailwind CSS
+- TypeScript
+- Angular Signals
+- Angular Router (Lazy Loading)
+- HttpClient com Interceptor JWT
 
 ---
 
-## Arquitetura
+## Funcionalidades
 
-O projeto segue os princípios da **Clean Architecture**, dividido em 4 camadas:
+### Loja
+- Vitrine de produtos com listagem e busca
+- Página de detalhe do produto
+- Carrinho de compras (gerenciado com Signals)
+- Checkout e finalização de pedido
 
-```
-ECommerce/
-├── ECommerce.Domain/           # Entidades, regras de negócio, interfaces
-├── ECommerce.Application/      # Use Cases, DTOs, Commands, Queries (CQRS)
-├── ECommerce.Infrastructure/   # EF Core, repositórios, AppDbContext
-└── ECommerce.API/              # Controllers, Middleware, configuração
-```
+### Autenticação
+- Cadastro de usuário
+- Login com JWT
+- Redirecionamento automático por role (Admin/Customer)
+- Guard de rotas protegidas
 
-A regra de dependência é sempre de fora para dentro — o `Domain` não conhece nenhuma outra camada.
+### Painel Admin
+- Gerenciamento de produtos (criar, listar, excluir)
+- Gerenciamento de categorias
+- Visualização e atualização de status de pedidos
+- Gerenciamento de usuários (promover/rebaixar roles)
 
 ---
 
 ## Pré-requisitos
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Docker](https://www.docker.com/) e Docker Compose
-- [dotnet-ef](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) (ferramenta global)
+- [Node.js 18+](https://nodejs.org/)
+- [Angular CLI 18](https://angular.dev/tools/cli)
 
 ```bash
-dotnet tool install --global dotnet-ef
+npm install -g @angular/cli@18
 ```
 
 ---
@@ -52,266 +53,162 @@ dotnet tool install --global dotnet-ef
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/ecommerce-api.git
-cd ecommerce-api
+git clone https://github.com/seu-usuario/ecommerce-front.git
+cd ecommerce-front
 ```
 
-### 2. Suba o banco de dados com Docker
+### 2. Instale as dependências
 
 ```bash
-docker-compose up -d
+npm install
 ```
 
-O PostgreSQL ficará disponível em `localhost:9000`.
+### 3. Configure o environment
 
-### 3. Configure o appsettings.json
+Edite o arquivo `src/environments/environment.development.ts`:
 
-```json
-{
-  "ConnectionStrings": {
-    "Default": "Host=localhost;Port=9000;Database=ecommercedb;Username=postgres;Password=postgres"
-  },
-  "Jwt": {
-    "Key": "minha-chave-super-secreta-com-32-chars!!",
-    "Issuer": "ECommerceAPI",
-    "Audience": "ECommerceClient"
-  }
-}
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:5103/api'
+};
 ```
 
-### 4. Rode as migrations
+### 4. Rode o servidor de desenvolvimento
 
 ```bash
-dotnet ef database update \
-  --project ECommerce.Infrastructure/ECommerce.Infrastructure.csproj \
-  --startup-project ECommerce.API/ECommerce.API.csproj
+ng serve
 ```
 
-### 5. Execute a API
+Acesse em `http://localhost:4200`.
+
+> O backend precisa estar rodando localmente. Veja as instruções em [ecommerce-api](https://github.com/seu-usuario/ecommerce-api).
+
+---
+
+## Estrutura de pastas
+
+```
+src/
+├── app/
+│   ├── core/
+│   │   ├── guards/
+│   │   │   ├── auth.guard.ts         # Protege rotas autenticadas
+│   │   │   └── admin.guard.ts        # Protege rotas de admin
+│   │   ├── interceptors/
+│   │   │   └── auth.interceptor.ts   # Injeta token JWT nas requisições
+│   │   ├── models/
+│   │   │   ├── product.model.ts
+│   │   │   ├── category.model.ts
+│   │   │   ├── order.model.ts
+│   │   │   └── user.model.ts
+│   │   └── services/
+│   │       ├── auth.service.ts
+│   │       ├── product.service.ts
+│   │       ├── category.service.ts
+│   │       ├── order.service.ts
+│   │       ├── cart.service.ts
+│   │       └── user.service.ts
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── login/
+│   │   │   └── register/
+│   │   ├── shop/
+│   │   │   ├── product-list/
+│   │   │   ├── product-detail/
+│   │   │   └── cart/
+│   │   ├── checkout/
+│   │   └── admin/
+│   │       ├── products/
+│   │       ├── categories/
+│   │       ├── orders/
+│   │       └── users/
+│   ├── shared/
+│   │   └── components/
+│   │       └── navbar/
+│   ├── app.routes.ts
+│   └── app.config.ts
+├── environments/
+│   ├── environment.ts
+│   ├── environment.development.ts
+│   └── environment.prod.ts
+└── styles.css
+```
+
+---
+
+## Rotas
+
+| Rota | Acesso | Descrição |
+|------|--------|-----------|
+| `/shop` | Público | Vitrine de produtos |
+| `/shop/:id` | Público | Detalhe do produto |
+| `/cart` | Público | Carrinho de compras |
+| `/checkout` | Autenticado | Finalizar pedido |
+| `/login` | Público | Login |
+| `/register` | Público | Cadastro |
+| `/admin/products` | Admin | Gerenciar produtos |
+| `/admin/categories` | Admin | Gerenciar categorias |
+| `/admin/orders` | Admin | Gerenciar pedidos |
+| `/admin/users` | Admin | Gerenciar usuários |
+
+---
+
+## Autenticação e Roles
+
+O sistema possui dois tipos de usuário:
+
+| Role | Acesso |
+|------|--------|
+| **Customer** | Vitrine, carrinho, checkout, meus pedidos |
+| **Admin** | Tudo + painel administrativo |
+
+Após o login, o token JWT é armazenado no `localStorage` e injetado automaticamente em todas as requisições via interceptor.
+
+O usuário admin padrão é criado automaticamente pelo backend:
+```
+Email: admin@ecommerce.com
+Senha: Admin@123
+```
+
+---
+
+## Build para produção
 
 ```bash
-dotnet run --project ECommerce.API/ECommerce.API.csproj
+ng build
 ```
 
-A API ficará disponível em `http://localhost:PORTA/swagger`.
+Os arquivos serão gerados em `dist/ecommerce-front`.
 
 ---
 
-## Endpoints
-
-### Auth
-
-| Método | Rota | Autenticação | Descrição |
-|--------|------|-------------|-----------|
-| POST | `/api/auth/register` | Não | Registra um novo usuário |
-| POST | `/api/auth/login` | Não | Realiza login e retorna o token JWT |
-
-**Exemplo de registro:**
-```json
-POST /api/auth/register
-{
-  "email": "usuario@email.com",
-  "password": "Senha@123"
-}
-```
-
-**Exemplo de login:**
-```json
-POST /api/auth/login
-{
-  "email": "usuario@email.com",
-  "password": "Senha@123"
-}
-```
-
----
-
-### Products
-
-| Método | Rota | Autenticação | Descrição |
-|--------|------|-------------|-----------|
-| GET | `/api/products` | Não | Lista todos os produtos |
-| GET | `/api/products/{id}` | Não | Busca produto por ID |
-| POST | `/api/products` | Sim | Cria um novo produto |
-| PUT | `/api/products/{id}` | Sim | Atualiza um produto |
-| DELETE | `/api/products/{id}` | Sim | Remove um produto |
-
-**Exemplo de criação:**
-```json
-POST /api/products
-Authorization: Bearer {token}
-{
-  "name": "Camiseta Básica",
-  "description": "Camiseta 100% algodão",
-  "price": 49.90,
-  "stock": 100,
-  "categoryId": "guid-da-categoria"
-}
-```
-
----
-
-### Categories
-
-| Método | Rota | Autenticação | Descrição |
-|--------|------|-------------|-----------|
-| GET | `/api/categories` | Não | Lista todas as categorias |
-| POST | `/api/categories` | Sim | Cria uma nova categoria |
-
-**Exemplo de criação:**
-```json
-POST /api/categories
-Authorization: Bearer {token}
-{
-  "name": "Roupas"
-}
-```
-
----
-
-### Orders
-
-| Método | Rota | Autenticação | Descrição |
-|--------|------|-------------|-----------|
-| GET | `/api/orders` | Sim | Lista pedidos do usuário autenticado |
-| POST | `/api/orders` | Sim | Cria um novo pedido |
-| PATCH | `/api/orders/{id}/status` | Sim | Atualiza o status do pedido |
-
-**Exemplo de criação de pedido:**
-```json
-POST /api/orders
-Authorization: Bearer {token}
-{
-  "items": [
-    {
-      "productId": "guid-do-produto",
-      "quantity": 2
-    }
-  ]
-}
-```
-
-**Status disponíveis:**
-- `0` — Pending
-- `1` — Confirmed
-- `2` — Shipped
-- `3` — Delivered
-- `4` — Cancelled
-
----
-
-## Autenticação
-
-A API utiliza **JWT Bearer**. Após o login, inclua o token no header de todas as requisições protegidas:
-
-```
-Authorization: Bearer {seu-token-aqui}
-```
-
----
-
-## Docker Compose
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:16
-    container_name: ecommerce-db
-    environment:
-      POSTGRES_DB: ecommercedb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "9000:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
-```
-
----
-
-## Deploy
-
-### Backend → Render
+## Deploy no Vercel
 
 1. Faça o push do projeto para o GitHub
-2. Crie um novo **Web Service** no [Render](https://render.com)
-3. Selecione o repositório e o Render detectará o `Dockerfile` automaticamente
-4. Configure as variáveis de ambiente:
+2. Acesse [vercel.com](https://vercel.com) e importe o repositório
+3. O Vercel detecta o Angular automaticamente
+4. Configure a variável de ambiente ou atualize `environment.prod.ts`:
 
-```
-ConnectionStrings__Default=Host=seu-host;Port=5432;Database=ecommercedb;Username=user;Password=senha
-Jwt__Key=sua-chave-secreta-com-32-chars
-Jwt__Issuer=ECommerceAPI
-Jwt__Audience=ECommerceClient
-ASPNETCORE_ENVIRONMENT=Production
-```
-
-### Banco de dados → Render PostgreSQL
-
-1. Crie um **PostgreSQL** gratuito no Render
-2. Copie a connection string gerada e cole na variável `ConnectionStrings__Default`
-
-### Frontend → Vercel
-
-Configure a URL do frontend no `Program.cs` dentro da política de CORS:
-
-```csharp
-policy.WithOrigins("https://seu-app.vercel.app")
+```ts
+export const environment = {
+  production: true,
+  apiUrl: 'https://sua-api.onrender.com/api'
+};
 ```
 
----
+5. Crie um arquivo `vercel.json` na raiz para suporte ao Angular Router:
 
-## Estrutura de pastas completa
-
-```
-ECommerce/
-├── ECommerce.Domain/
-│   ├── Entities/
-│   │   ├── Product.cs
-│   │   ├── Category.cs
-│   │   ├── Order.cs
-│   │   └── OrderItem.cs
-│   ├── Enums/
-│   │   └── OrderStatus.cs
-│   ├── Exceptions/
-│   │   └── DomainException.cs
-│   └── Interfaces/
-│       ├── IProductRepository.cs
-│       ├── ICategoryRepository.cs
-│       └── IOrderRepository.cs
-├── ECommerce.Application/
-│   ├── Common/Exceptions/
-│   │   └── NotFoundException.cs
-│   ├── Products/Commands/ (Create, Update, Delete)
-│   ├── Products/Queries/ (GetAll, GetById)
-│   ├── Products/Dtos/
-│   ├── Orders/Commands/ (CreateOrder, UpdateOrderStatus)
-│   ├── Orders/Queries/ (GetOrdersByUser)
-│   ├── Orders/Dtos/
-│   ├── Categories/Commands/ (CreateCategory)
-│   └── Categories/Queries/ (GetAllCategories)
-├── ECommerce.Infrastructure/
-│   ├── Data/
-│   │   ├── AppDbContext.cs
-│   │   └── Configurations/
-│   └── Repositories/
-├── ECommerce.API/
-│   ├── Controllers/
-│   ├── Middleware/
-│   ├── Program.cs
-│   └── appsettings.json
-├── docker-compose.yml
-├── Dockerfile
-└── README.md
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
 ```
 
 ---
 
 ## Licença
 
-Este projeto foi desenvolvido para fins de estudos e portfólio.
+Este projeto foi desenvolvido para fins de portfólio.

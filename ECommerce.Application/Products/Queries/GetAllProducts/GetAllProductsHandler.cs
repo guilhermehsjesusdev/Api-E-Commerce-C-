@@ -14,6 +14,13 @@ public class GetAllProductsHandler : IRequestHandler<GetAllProductsQuery, IEnume
     {
         var products = await _repo.GetAllAsync();
         return products.Select(p => new ProductDto(
-            p.Id, p.Name, p.Description, p.Price, p.Stock, p.CategoryId));
+            p.Id,
+            p.Name,
+            p.Description,
+            p.Price,
+            p.Stock,
+            p.CategoryId,
+            p.ImageUrl
+        ));
     }
 }

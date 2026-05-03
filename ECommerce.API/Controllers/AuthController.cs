@@ -29,6 +29,8 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
+        await _userManager.AddToRoleAsync(user, "Customer");
+
         return Ok(new { message = "Usuário criado com sucesso." });
     }
 
@@ -39,17 +41,21 @@ public class AuthController : ControllerBase
         if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Unauthorized(new { error = "Email ou senha inválidos." });
 
-        var token = GenerateToken(user);
-        return Ok(new { token });
+        var roles = await _userManager.GetRolesAsync(user);
+        var token = GenerateToken(user, roles);
+        return Ok(new { token, role = roles.FirstOrDefault() });
     }
 
-    private string GenerateToken(IdentityUser user)
+    private string GenerateToken(IdentityUser user, IList<string> roles)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email!)
         };
+
+        foreach (var role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -19,7 +19,7 @@ public class CategoriesController : ControllerBase
         Ok(await _mediator.Send(new GetAllCategoriesQuery()));
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateCategoryCommand cmd)
     {
         var id = await _mediator.Send(cmd);
