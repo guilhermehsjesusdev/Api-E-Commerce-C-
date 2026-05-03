@@ -112,6 +112,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Rodar migrations automaticamente
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 // Seed de Roles e Admin padrão
 using (var scope = app.Services.CreateScope())
 {
