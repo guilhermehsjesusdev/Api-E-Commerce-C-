@@ -53,7 +53,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:4200",
-            "https://api-e-commerce-c.onrender.com"
+            "https://e-commerce-front-umber.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod();
